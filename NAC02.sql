@@ -7,7 +7,6 @@ TURMA: 2TDSF
 */
 
 --1.
-
 SET serveroutput ON
 SET feed OFF
 SET verify OFF
@@ -19,6 +18,7 @@ DECLARE
  CURSOR empCursor IS
     SELECT e.last_name, e.salary
     FROM EMP e
+    WHERE e.salary IS NOT NULL
     ORDER BY e.salary DESC;
 
     v_total_funcionarios NUMBER(3) := 0;
@@ -52,6 +52,8 @@ SET feed ON
 SET serveroutput OFF
 
 --2.
+TRUNCATE TABLE TOP_DOGS;
+
 SET serveroutput ON
 SET feed OFF
 SET verify OFF
@@ -63,6 +65,7 @@ DECLARE
  CURSOR empCursor IS
     SELECT e.last_name, e.salary
     FROM EMP e
+    WHERE e.salary IS NOT NULL
     ORDER BY e.salary DESC;
 
     v_total_funcionarios NUMBER(3) := 0;
@@ -84,24 +87,26 @@ BEGIN
         DBMS_OUTPUT.PUT_LINE('Tabela TOP_DOGS esvaziada!');
     ELSE
         FOR v_registro_emp IN empCursor
-        LOOP        
-            IF v_repetidos <= 1 THEN
-                DBMS_OUTPUT.PUT_LINE(v_registro_emp.last_name || ' ' || v_registro_emp.salary);
-                INSERT INTO TOP_DOGS d (d.name, d.salary) VALUES(v_registro_emp.last_name, v_registro_emp.salary); 
-            END IF;
-            
+        LOOP           
+            DBMS_OUTPUT.PUT_LINE(v_registro_emp.last_name || ' ' || v_registro_emp.salary);
+            INSERT INTO TOP_DOGS d (d.name, d.salary) VALUES(v_registro_emp.last_name, v_registro_emp.salary);
+        
             IF v_salary_buff = v_registro_emp.salary THEN
                 v_repetidos := v_repetidos +1;
             ELSE
                 v_salary_buff := v_registro_emp.salary;
-            END IF;            
+            END IF;
+            
         EXIT WHEN empCursor%ROWCOUNT = v_n_funcionarios + v_repetidos OR empCursor%NOTFOUND;
+        
         END LOOP;
  
         COMMIT;
     END IF;
 END;
 /
+
+--SELECT * FROM TOP_DOGS;
 
 SET verify ON
 SET feed ON
